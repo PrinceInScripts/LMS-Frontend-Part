@@ -19,7 +19,7 @@ export const createAccount=createAsyncThunk("/auth/signup",async (data)=>{
             },
             error:'Faild to create your account'
         })
-        return (await response).data;
+        return await response;
     } catch (error) {
         toast.error(error?.response?.data?.message)
     }
@@ -45,8 +45,8 @@ export const updateProfile=createAsyncThunk("/auth/updateProfile",async (data)=>
 
 export const getUserData=createAsyncThunk("/auth/getData",async (dta)=>{
     try {
-        const response=await axiosInstance.get("/user/me")
-        return response?.data;
+        const response=axiosInstance.get("user/me")
+        return (await response).data;
     } catch (error) {
         toast.error(error?.message)
     }
@@ -55,16 +55,16 @@ export const getUserData=createAsyncThunk("/auth/getData",async (dta)=>{
 
 export const login=createAsyncThunk("/auth/signin",async (data)=>{
     try {
-        const response=axiosInstance.post("/user/login",data)
+        const response=axiosInstance.post("user/login",data)
 
         toast.promise(response,{
-            loading:'Loading...',
+            loading:'Wait! authenticating your account',
             success:(data)=>{
                 return data?.data?.message;
             },
             error:'Faild to authenticate your account'
         })
-        return (await response).data;
+        return await response;
     } catch (error) {
         toast.error(error?.response?.data?.message)
     }
@@ -81,7 +81,7 @@ export const logout=createAsyncThunk("/auth/logout",async ()=>{
             },
             error:'Faild to logout your account'
         })
-        return (await response).data;
+        return await response;
     } catch (error) {
         toast.error(error?.response?.data?.message)
     }
@@ -156,23 +156,17 @@ const authSlice=createSlice({
         builder
         .addCase(login.fulfilled,(state,action)=>{
 
-            // const user = action.payload?.data?.user;
+            const user = action.payload?.data?.user;
 
-            // if (user) {
-            //   localStorage.setItem('data', JSON.stringify(user));
-            //   localStorage.setItem('isLoggedIn', true);
-            //   localStorage.setItem('role', user.role);
+            if (user) {
+              localStorage.setItem('data', JSON.stringify(user));
+              localStorage.setItem('isLoggedIn', true);
+              localStorage.setItem('role', user.role);
     
-            //   state.isLoggedIn = true;
-            //   state.role = user.role;
-            //   state.data = user;
-            // }
-            localStorage.setItem("data", JSON.stringify(action?.payload?.user));
-            localStorage.setItem("isLoggedIn", true);
-            localStorage.setItem("role", action?.payload?.user?.role);
-            state.isLoggedIn = true;
-            state.data = action?.payload?.user;
-            state.role = action?.payload?.user?.role;
+              state.isLoggedIn = true;
+              state.role = user.role;
+              state.data = user;
+            }
         })
         .addCase(logout.fulfilled,(state)=>{
             localStorage.clear()
